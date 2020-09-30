@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Times</title>
+    <link rel="stylesheet" href="mycss.css">
+</head>
+<body>
+
+    <div id="genel">
+
+        
+    </div>
+
+
+    <table border="2px">
+        <tr>
+            <th>Date</th>
+            <th>Fajr</th>
+            <th>Sunrise</th>
+            <th>Zuhar</th>
+            <th>Asar</th>
+            <th>Maghrib</th>
+            <th>Isha</th>
+        </tr>
+    </table>
+
+
+<h1 style="text-align: center;color: white;font-size: 40px;">Day to Day moon images</h1>
+
+
+<div class="moonimgdiv">
+
+
+</div>
+
+
+
+    <script>
+        var electron = require("electron")
+        var { ipcRenderer } = electron
+        var table = document.querySelector("table")
+        var imgdiv = document.querySelector(".moonimgdiv")
+        appdiv = document.querySelector("#genel")
+        nav = document.createElement("div")
+        nav.classList.add("nav")
+        appdiv.appendChild(nav)
+        homebtn = document.createElement("button")
+        homebtn.classList.add("homebtn")
+        homebtn.innerText = "<="
+        homebtn.addEventListener("click",() => {
+            ipcRenderer.send("routeToHome","home")
+        })
+        nav.appendChild(homebtn)
+
+
+
+
+
+
+
+        ipcRenderer.on("ilcekodugelir",(err,data) => {
+           console.log(data);
+           console.log("ilceid: ",data["IlceID"]);
+           var request = new XMLHttpRequest()
+            request.open("GET","https://ezanvakti.herokuapp.com/vakitler/"+data["IlceID"],true)
+
+            request.onload = function () {
+                var vaxtlar = JSON.parse(this.response)
+                for(var i = 0;i<vaxtlar.length;i++){
+                    console.log("table: ",table);
+                    console.log("tr olusturludu");
+                    var tr = document.createElement("tr")
+                    for(var j = 0;j<8;j++){
+                        var th = document.createElement("th")
+                        tr.appendChild(th)
+                    }
+                    console.log(i)
+                    table.appendChild(tr)
+                    table.rows[i+1].cells[0].innerText = vaxtlar[i]["MiladiTarihKisa"]
+                    table.rows[i+1].cells[1].innerText = vaxtlar[i]["Imsak"]
+                    table.rows[i+1].cells[2].innerText = vaxtlar[i]["Gunes"]
+                    table.rows[i+1].cells[3].innerText = vaxtlar[i]["Ogle"]
+                    table.rows[i+1].cells[4].innerText = vaxtlar[i]["Ikindi"]
+                    table.rows[i+1].cells[5].innerText = vaxtlar[i]["Aksam"]
+                    table.rows[i+1].cells[6].innerText = vaxtlar[i]["Yatsi"]
+                    var moonimg = document.createElement("img")
+                    moonimg.setAttribute("src",vaxtlar[i]["AyinSekliURL"])
+                    moonimg.classList.add("moonimg")
+                    imgdiv.appendChild(moonimg)
+                }
+            }
+
+            request.send()
+
+        })
+
+    </script>
+</body>
+</html>
